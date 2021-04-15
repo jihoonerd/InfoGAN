@@ -15,7 +15,7 @@ def test_generate_latent_sample():
     noise_vec_dim = 4
     discrete_dim = 3
     continuous_dim = 2
-    latent_sample_vec = generate_latent_sample(batch_size, noise_vec_dim, discrete_dim, continuous_dim)
+    latent_sample_vec, indices = generate_latent_sample(batch_size, noise_vec_dim, discrete_dim, continuous_dim)
     
     assert (latent_sample_vec[:, :noise_vec_dim].abs() <= 1).all()
     assert (latent_sample_vec[:, noise_vec_dim:noise_vec_dim + discrete_dim].sum(dim=1) == torch.ones(batch_size,)).all()

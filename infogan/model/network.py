@@ -43,6 +43,7 @@ class Discriminator(nn.Module):
         )
 
         self.sigmoid = nn.Sigmoid()
+        self.softmax = nn.Softmax(dim=-1)
         self.softplus = nn.Softplus()
 
     def forward(self, x):
@@ -51,7 +52,7 @@ class Discriminator(nn.Module):
         
         q_out = self.infogan_q(discriminator_out)
         
-        q_discrete = self.softplus(q_out[:,:self.discrete_code_dim])
+        q_discrete = self.softmax(q_out[:,:self.discrete_code_dim])
         
         q_continuous = q_out[:,self.discrete_code_dim:]  # e.g.) [cont_mu1, cont_mu2, cont_sigma1, cont_simga2]
         q_mu = q_continuous[:, :self.continuous_code_dim]

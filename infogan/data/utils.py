@@ -17,4 +17,4 @@ def generate_latent_sample(batch_size, noise_dim, discrete_code_dim, continuous_
             continuous_code = torch.FloatTensor(batch_size, 1).uniform_(-1, 1)
             latent_vec = torch.cat([latent_vec, continuous_code], dim=1)
 
-    return latent_vec
+    return latent_vec, label_idx

@@ -55,6 +55,6 @@ class Discriminator(nn.Module):
         
         q_continuous = q_out[:,self.discrete_code_dim:]  # e.g.) [cont_mu1, cont_mu2, cont_sigma1, cont_simga2]
         q_mu = q_continuous[:, :self.continuous_code_dim]
-        q_sigma = self.softplus(q_continuous[:, self.continuous_code_dim:])  # Use softplus to make std positive value
+        q_var = self.softplus(q_continuous[:, self.continuous_code_dim:])  # Use softplus to make var positive value
 
-        return regular_gan_out, q_discrete, q_mu, q_sigma
+        return regular_gan_out, q_discrete, q_mu, q_var

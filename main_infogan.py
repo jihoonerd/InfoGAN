@@ -17,6 +17,9 @@ def infogan():
     p.mkdir(parents=True, exist_ok=True)
     data = generate_circle_toy_data()
     plt.scatter(data[:, 0], data[:, 1])
+    plt.xlim([-10, 10])
+    plt.ylim([-10, 10])
+    plt.grid()
     plt.savefig('fig/original.png')
 
     # set training settings
@@ -78,7 +81,7 @@ def infogan():
 
         print(f"EPOCH [{epoch}]: Generator Loss: {total_gl} / Discriminator Loss: {total_dl}")
 
-        if epoch % 1000 == 0:
+        if epoch % 10 == 0:
             z_fake, fake_indices = generate_latent_sample(100, noise_vector_dim, discrete_code_dim, continuous_code_dim)
 
             z_fake_10 = z_fake.clone().detach()
@@ -94,7 +97,10 @@ def infogan():
             plt.figure()
             plt.scatter(out_10[:, 0], out_10[:, 1], color='red')
             plt.scatter(out_01[:, 0], out_01[:, 1], color='green')
-            plt.savefig(f"fig/generated_{epoch}.png")
+            plt.xlim([-10, 10])
+            plt.ylim([-10, 10])
+            plt.grid()
+            plt.savefig("fig/generated_{0:05d}.png".format(epoch))
 
         
         

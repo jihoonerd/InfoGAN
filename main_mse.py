@@ -19,6 +19,9 @@ def infogan():
     p_gen.mkdir(parents=True, exist_ok=True)
     data = generate_circle_toy_data()
     plt.scatter(data[:, 0], data[:, 1])
+    plt.xlim([-10, 10])
+    plt.ylim([-10, 10])
+    plt.grid()
     plt.savefig('assets/original/data.png')
 
     # set training settings
@@ -44,7 +47,7 @@ def infogan():
         epoch += 1
 
         g_optimizer.zero_grad()
-        z_fake = torch.randn(2000, 34)
+        z_fake = torch.randn(400, 34)
         generated_samples = generator(z_fake)
 
         loss = mse_loss(generated_samples, data)
@@ -59,6 +62,9 @@ def infogan():
 
             plt.figure()
             plt.scatter(out[:, 0], out[:, 1], color='orange')
+            plt.xlim([-10, 10])
+            plt.ylim([-10, 10])
+            plt.grid()
             plt.savefig(f"assets/generated/generated_{epoch}.png")
 
 if __name__ == '__main__':

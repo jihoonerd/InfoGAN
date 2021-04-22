@@ -16,16 +16,16 @@ Experiments with InfoGAN.
 ![exp1_gen](/assets/exp1/infogan.gif)
 
 
-## Experiment 2) Predict next position with given start(fixed), goal(fixed), and current position
+## Experiment 2) Sequential prediction with given start(fixed), goal(fixed), and current position
 
 * Starting point: Red
 * Target point: Blue
 * Current seen: Black
 * Prediccted Next: Purple
 
-Training unstable
+Following single path is used for training and inference, but prediction is unstable.
 
-### Experiment 2) Sequential Prediction (30 points each for clock-wise and counter clock-wise direction)
+### Original Path (equally distributed 30 points each for clock-wise and counter clock-wise direction)
 
 ![exp2](/assets/exp2/original.png)
 

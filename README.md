@@ -14,3 +14,15 @@ Experiments with InfoGAN.
 * 2 discrete codes are used. [1, 0] for red and [0, 1] for green
 
 ![exp1_gen](/assets/exp1/infogan.gif)
+
+
+## Experiment 2) Predict next position with given start(fixed), goal(fixed), and current position
+
+### Given data
+
+
+
+
+### Generated data (InfoGAN)
+
+

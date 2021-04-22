@@ -12,7 +12,7 @@ from infogan.model.loss import NormalNLLLoss
 from infogan.model.network import Discriminator, Generator
 
 
-def infogan():
+def exp1():
 
     exp_path = 'exp_results/exp1/'
     p = pathlib.Path(exp_path)
@@ -106,9 +106,6 @@ def infogan():
             plt.grid()
             plt.savefig(os.path.join(gen_path, "generated_{0:05d}.png".format(epoch)))
 
-        
-        
-
 
 if __name__ == '__main__':
-    infogan()
+    exp1()

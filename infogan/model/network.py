@@ -7,9 +7,9 @@ class Generator(nn.Module):
 
         self.fc = nn.Sequential(
             nn.Linear(noise_dim + continuous_code_dim + discrete_code_dim, 64),
-            nn.ReLU(),
+            nn.LeakyReLU(0.1),
             nn.Linear(64, 32),
-            nn.ReLU(),
+            nn.LeakyReLU(0.1),
             nn.Linear(32, out_dim)
         )
 

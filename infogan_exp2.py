@@ -19,6 +19,7 @@ def exp2():
     exp_path = 'exp_results/exp2/'
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
+    np.random.seed(0)
     cw_coord, ccw_coord = generate_circle_toy_data_by_angle()
     plt.scatter(cw_coord[:, 0], cw_coord[:, 1], color='red')
     plt.scatter(ccw_coord[:, 0], ccw_coord[:, 1], color='green')
@@ -31,7 +32,7 @@ def exp2():
     input_vec_dim = 6
     discrete_code_dim = 0
     continuous_code_dim = 0
-    training_epochs = 20000
+    training_epochs = 30000
     data_dim = 2
 
     
@@ -49,15 +50,15 @@ def exp2():
     data_y = torch.FloatTensor(np.concatenate(y, axis=0))
 
     dataset = TensorDataset(data_x, data_y)
-    loader = DataLoader(dataset, batch_size=512, shuffle=False)
+    loader = DataLoader(dataset, batch_size=512, shuffle=True)
 
     generator = Generator(noise_dim=input_vec_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=continuous_code_dim, out_dim=data_dim)
     discriminator = Discriminator(data_dim=data_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=continuous_code_dim)
     
     discriminator_loss = nn.BCELoss()
 
-    g_optimizer = optim.Adam(generator.parameters()) 
-    d_optimizer = optim.Adam(discriminator.parameters())
+    g_optimizer = optim.Adam(generator.parameters(), lr=0.0001) 
+    d_optimizer = optim.Adam(discriminator.parameters(), lr=0.0001)
 
     for epoch in range(training_epochs):
 

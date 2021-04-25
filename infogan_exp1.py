@@ -32,7 +32,7 @@ def exp1():
     data_dim = 2
 
     # load data
-    data  = torch.Tensor(generate_circle_toy_data())
+    data  = torch.Tensor(data)
     batch_size = data.shape[0]
 
     # define GAN structure

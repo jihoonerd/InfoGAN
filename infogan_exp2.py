@@ -10,7 +10,6 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from infogan.data.generate_toy_example import generate_circle_toy_data_by_angle
 from infogan.data.utils import vectorize_path
-from infogan.model.loss import NormalNLLLoss
 from infogan.model.network import Discriminator, Generator
 
 
@@ -32,13 +31,12 @@ def exp2():
     input_vec_dim = 6
     discrete_code_dim = 0
     continuous_code_dim = 0
-    training_epochs = 30000
+    training_epochs = 10000
     data_dim = 2
 
     
     x = []
     y = []
-    cw_coord, ccw_coord = generate_circle_toy_data_by_angle()
     cw_input, cw_gt = vectorize_path(cw_coord)
     ccw_input, ccw_gt = vectorize_path(ccw_coord)
     x.append(cw_input)
@@ -57,8 +55,8 @@ def exp2():
     
     discriminator_loss = nn.BCELoss()
 
-    g_optimizer = optim.Adam(generator.parameters(), lr=0.0001) 
-    d_optimizer = optim.Adam(discriminator.parameters(), lr=0.0001)
+    g_optimizer = optim.Adam(generator.parameters()) 
+    d_optimizer = optim.Adam(discriminator.parameters())
 
     for epoch in range(training_epochs):
 

@@ -1,7 +1,7 @@
 import os
 import imageio
 
-png_dir = 'exp_results/exp2/generated'
+png_dir = 'exp_results/exp3/generated'
 images = []
 for file_name in sorted(os.listdir(png_dir)):
     if file_name.endswith('.png'):

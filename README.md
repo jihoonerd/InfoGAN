@@ -23,6 +23,9 @@ Experiments with InfoGAN.
 * Current seen: Black
 * Prediccted Next: Purple
 
+Generator's input: `[start_x, start_y, target_x, target_y, cur_x, cur_y]`
+Discriminator's input: `[(predicted/gt) x, (predicted/gt) y]`
+
 Following single path is used for training and inference, but prediction is unstable.
 
 ### Original Path (equally distributed 30 points each for clock-wise and counter clock-wise direction)
@@ -31,15 +34,27 @@ Following single path is used for training and inference, but prediction is unst
 
 ### Generated data (Vanilla GAN)
 
-#### Without Shuffle
-
-![exp2_wo_shuffle](/assets/exp2/wo_shuffle.gif)
-
-#### With Shuffle
-
 ![exp2_shuffle](/assets/exp2/w_shuffle.gif)
 
+## Experiment 3) Sequential prediction with past context
 
+* Starting point: Red
+* Target point: Blue
+* Current seen: Black
+* Prediccted Next: Purple
+
+Generator's input: `[start_x, start_y, target_x, target_y, cur_x, cur_y]`
+Discriminator's input: `[start_x, start_y, target_x, target_y, previous_x, previous_y, (predicted/gt) x, (predicted/gt) y]`
+
+Following single path is used for training and inference, but prediction is unstable.
+
+### Original Path (equally distributed 30 points each for clock-wise and counter clock-wise direction)
+
+![exp3](/assets/exp3/original.png)
+
+### Generated data (Vanilla GAN)
+
+![exp3_shuffle](/assets/exp3/w_shuffle.gif)
 
 
 

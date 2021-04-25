@@ -17,25 +17,31 @@ def generate_circle_toy_data():
 
 def generate_circle_toy_data_by_angle():
         
-    while True:
-        start_theta = np.random.uniform(low=0, high=360)
-        target_theta = np.random.uniform(low=0, high=360)
-        abs_angle_diff = np.abs(start_theta - target_theta) % 360
-        if 90 < abs_angle_diff < 270:
-            break
+    start_theta = 180
+    target_theta = 0
 
     if start_theta > target_theta:
-        cw_path = np.linspace(start_theta, target_theta, 30)
-        ccw_path = np.linspace(start_theta, target_theta + 360, 30)
+        cw_path = np.linspace(start_theta, target_theta, 50)
+        ccw_path = np.linspace(start_theta, target_theta + 360, 50)
     else:
-        cw_path = np.linspace(start_theta + 360, target_theta, 30)
-        ccw_path = np.linspace(start_theta, target_theta, 30)
+        cw_path = np.linspace(start_theta + 360, target_theta, 50)
+        ccw_path = np.linspace(start_theta, target_theta, 50)
     
-    cw_x = np.array([np.cos(np.radians(degree)) for degree in cw_path]).reshape(-1, 1)
-    cw_y = np.array([np.sin(np.radians(degree)) for degree in cw_path]).reshape(-1, 1)
+    cw_x = np.array([np.cos(np.radians(degree % 360)) for degree in cw_path]).reshape(-1, 1)
+    cw_y = np.array([np.sin(np.radians(degree % 360)) for degree in cw_path]).reshape(-1, 1)
 
-    ccw_x = np.array([np.cos(np.radians(degree)) for degree in ccw_path]).reshape(-1, 1)
-    ccw_y = np.array([np.sin(np.radians(degree)) for degree in ccw_path]).reshape(-1, 1)
+    ccw_x = np.array([np.cos(np.radians(degree % 360)) for degree in ccw_path]).reshape(-1, 1)
+    ccw_y = np.array([np.sin(np.radians(degree % 360)) for degree in ccw_path]).reshape(-1, 1)
+
+    # common path
+    common_x = np.arange(-1.3, -1.0, 0.05).reshape(-1, 1)
+    common_y = np.zeros_like(common_x)
+
+    cw_x = np.concatenate([common_x, cw_x])
+    cw_y = np.concatenate([common_y, cw_y])
+
+    ccw_x = np.concatenate([common_x, ccw_x])
+    ccw_y = np.concatenate([common_y, ccw_y])
 
     cw_coord = np.concatenate([cw_x, cw_y], axis=1)
     ccw_coord = np.concatenate([ccw_x, ccw_y], axis=1)

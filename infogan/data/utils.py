@@ -85,4 +85,17 @@ def vectorize_path(coord):
         [start_state, target_state, intm_state[-1]]))
     gt_vector.append(target_state)
 
-    return input_vector, gt_vector
+    return np.stack(input_vector), np.stack(gt_vector)
+
+
+def compose_past_ctxt(vectorize_input, gt):
+    """Add 4 previous inputs"""
+    cw_context = np.zeros((vectorize_input.shape[0]-4, 14))
+    for i in range(cw_context.shape[0]):
+        cw_context[i,:6] = vectorize_input[i+4][:6]
+        cw_context[i,6:8] = vectorize_input[i+3][4:6]
+        cw_context[i,8:10] = vectorize_input[i+2][4:6]
+        cw_context[i,10:12] = vectorize_input[i+1][4:6]
+        cw_context[i,12:] = vectorize_input[i][4:6]
+
+    return torch.Tensor(cw_context), torch.Tensor(gt[4:])

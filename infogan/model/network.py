@@ -6,11 +6,11 @@ class Generator(nn.Module):
         super().__init__()
 
         self.fc = nn.Sequential(
-            nn.Linear(noise_dim + continuous_code_dim + discrete_code_dim, 64),
-            nn.LeakyReLU(0.1),
-            nn.Linear(64, 32),
-            nn.LeakyReLU(0.1),
-            nn.Linear(32, out_dim)
+            nn.Linear(noise_dim + continuous_code_dim + discrete_code_dim, 128),
+            nn.ReLU(0.1),
+            nn.Linear(128, 128),
+            nn.ReLU(0.1),
+            nn.Linear(128, out_dim)
         )
 
     def forward(self, x):
@@ -27,19 +27,19 @@ class Discriminator(nn.Module):
         self.continuous_code_dim = continuous_code_dim
 
         self.discriminator = nn.Sequential(
-            nn.Linear(data_dim, 64),
-            nn.LeakyReLU(0.1),
-            nn.Linear(64, 32)
+            nn.Linear(data_dim, 128),
+            nn.ReLU(0.1),
+            nn.Linear(128, 128)
         )
 
         self.regular_gan = nn.Sequential(
-            nn.Linear(32, 1)
+            nn.Linear(128, 1)
         )
 
         self.infogan_q = nn.Sequential(
-            nn.Linear(32, 16),
-            nn.LeakyReLU(0.1),
-            nn.Linear(16, discrete_code_dim + continuous_code_dim * 2)  # continuous code needs to have mu, sigma respectively
+            nn.Linear(128, 128),
+            nn.ReLU(0.1),
+            nn.Linear(128, discrete_code_dim + continuous_code_dim * 2)  # continuous code needs to have mu, sigma respectively
         )
 
         self.sigmoid = nn.Sigmoid()

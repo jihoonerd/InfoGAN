@@ -48,7 +48,7 @@ def exp2():
     data_y = torch.FloatTensor(np.concatenate(y, axis=0))
 
     dataset = TensorDataset(data_x, data_y)
-    loader = DataLoader(dataset, batch_size=512, shuffle=True)
+    loader = DataLoader(dataset, batch_size=512, shuffle=False)
 
     generator = Generator(noise_dim=input_vec_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=continuous_code_dim, out_dim=data_dim)
     discriminator = Discriminator(data_dim=data_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=continuous_code_dim)

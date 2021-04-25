@@ -17,8 +17,12 @@ def generate_circle_toy_data():
 
 def generate_circle_toy_data_by_angle():
         
-    start_theta = np.random.uniform(low=0, high=360)
-    target_theta = np.random.uniform(low=0, high=360)
+    while True:
+        start_theta = np.random.uniform(low=0, high=360)
+        target_theta = np.random.uniform(low=0, high=360)
+        abs_angle_diff = np.abs(start_theta - target_theta) % 360
+        if 90 < abs_angle_diff < 270:
+            break
 
     if start_theta > target_theta:
         cw_path = np.linspace(start_theta, target_theta, 30)

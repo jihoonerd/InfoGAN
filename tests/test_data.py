@@ -1,4 +1,4 @@
-from infogan.data.generate_toy_example import generate_circle_toy_data
+from infogan.data.generate_toy_example import generate_circle_toy_data, generate_circle_toy_data_by_angle
 from infogan.data.utils import generate_latent_sample
 import torch
 import matplotlib.pyplot as plt
@@ -8,7 +8,13 @@ def test_toy_circle_data():
     data = generate_circle_toy_data()
     plt.scatter(data[:, 0], data[:, 1])
     plt.show()
-    
+
+
+def test_generate_circle_toy_data_by_angle():
+    data = generate_circle_toy_data_by_angle()
+    plt.scatter(data[0][:, 0], data[0][:, 1], color='red')
+    plt.scatter(data[1][:, 0], data[1][:, 1], color='blue')
+    plt.show()
 
 def test_generate_latent_sample():
     batch_size = 5

@@ -19,10 +19,9 @@ def exp3():
     exp_path = 'exp_results/exp3/'
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
-    np.random.seed(0)
     cw_coord, ccw_coord = generate_circle_toy_data_by_angle()
-    plt.scatter(cw_coord[:, 0], cw_coord[:, 1], color='red')
-    plt.scatter(ccw_coord[:, 0], ccw_coord[:, 1], color='green')
+    plt.scatter(cw_coord[:, 0], cw_coord[:, 1], color='red', marker='o')
+    plt.scatter(ccw_coord[:, 0], ccw_coord[:, 1], color='green', marker='x')
     plt.xlim([-5, 5])
     plt.ylim([-5, 5])
     plt.grid()
@@ -32,7 +31,7 @@ def exp3():
     input_vec_dim = 14  # [start x, start y, target x, target y, t_x, t_y, t-1_x, t-1_y...] 4 + 2*5
     discrete_code_dim = 2
     continuous_code_dim = 0
-    training_epochs = 3000
+    training_epochs = 5000
     gen_dim = 2
     disc_dim = 16
 
@@ -80,7 +79,7 @@ def exp3():
             
             gen_with_context = torch.cat([x, generated_samples], dim=1)
 
-            d_fake_gan_out, fake_q_discrete, fake_q_mu, fake_q_var = discriminator(gen_with_context.detach())
+            d_fake_gan_out, _, _, _ = discriminator(gen_with_context.detach())
             loss_d_fake = discriminator_loss(d_fake_gan_out, fake_labels)
 
             total_dl = loss_d_real + loss_d_fake
@@ -90,9 +89,7 @@ def exp3():
             g_optimizer.zero_grad()
             g_fake_gan_out, fake_q_discrete, fake_q_mu, fake_q_var = discriminator(gen_with_context)
             generator_loss = discriminator_loss(g_fake_gan_out, real_labels)
-
             discrete_code_loss = generator_discrete_loss(fake_q_discrete, fake_indices)
-            # continuous_code_loss = generator_continuous_loss(code_added[:, input_vec_dim + discrete_code_dim:], fake_q_mu, fake_q_var) * 0.1
 
             total_gl = generator_loss + discrete_code_loss
             total_gl.backward()
@@ -100,12 +97,10 @@ def exp3():
         
         print(f"EPOCH [{epoch}]: Generator Loss: {generator_loss} / Discriminator Loss: {total_dl}")    
 
-    generated_samples = generator(code_added).detach().numpy()
 
-    path_len = code_added.shape[0]/2
-    for i in range(x.shape[0]):
-
-        
+    inference_x_10 = data_x[0].clone().detach()
+    inference_x_01 = data_x[0].clone().detach()
+    for i in range(int(data_x.shape[0]/2)):
 
         gen_path = os.path.join(exp_path, 'generated')
         p = pathlib.Path(gen_path)
@@ -114,25 +109,38 @@ def exp3():
         circle = plt.Circle((0, 0), 1, color='grey', fill=False)
         plt.gca().add_patch(circle)
 
-        code_10 = code_added.clone().detach()
-        code_10[:, 14] = 1
-        code_10[:, 15] = 0
-        out_10 = generator(code_10).detach().numpy()
+        code_10 = torch.Tensor([1, 0])
+        coded_10 = torch.cat([inference_x_10.reshape(1, -1), code_10.reshape(1, -1)], dim=1)
+        generated_sample_10 = generator(coded_10).detach().squeeze()
 
-        code_01 = code_added.clone().detach()
-        code_01[:, 14] = 0
-        code_01[:, 15] = 1
-        out_01 = generator(code_01).detach().numpy()
+        code_01 = torch.Tensor([0, 1])
+        coded_01 = torch.cat([inference_x_01.reshape(1, -1), code_01.reshape(1, -1)], dim=1)
+        generated_sample_01 = generator(coded_01).detach().squeeze()
 
-        plt.scatter(code_added[i][0], code_added[i][1], color='red')
-        plt.scatter(code_added[i][2], code_added[i][3], color='blue')
-        plt.scatter(code_added[i][4:13:2], code_added[i][5:14:2], color='black')  # plot current pos
-        plt.scatter(out_10[i][0], out_10[i][1], color='purple')  # For code [1, 0]
-        plt.scatter(out_01[i][0], out_01[i][1], color='yellow')  # For code [0, 1]
+        plt.scatter(inference_x_10[0], inference_x_10[1], color='red')
+        plt.scatter(inference_x_10[2], inference_x_10[3], color='blue')
+        plt.scatter(inference_x_10[4:13:2], inference_x_10[5:14:2], color='black')  # plot current pos
+        plt.scatter(generated_sample_10[0], generated_sample_10[1], color='purple')  # prediction
+
+
+        plt.scatter(inference_x_01[0], inference_x_01[1], color='red')
+        plt.scatter(inference_x_01[2], inference_x_01[3], color='blue')
+        plt.scatter(inference_x_01[4:13:2], inference_x_01[5:14:2], color='brown')  # plot current pos
+        plt.scatter(generated_sample_01[0], generated_sample_01[1], color='cyan')  # prediction
+
         plt.xlim([-1.5, 1.5])
         plt.ylim([-1.5, 1.5])
         plt.grid()
         plt.savefig(os.path.join(gen_path, "generated_{0:05d}.png".format(i)))
+
+        inference_x_10 = inference_x_10.clone()
+        inference_x_10[6:14] = inference_x_10[4:12].clone()
+        inference_x_10[4:6] = generated_sample_10
+
+        inference_x_01 = inference_x_01.clone()
+        inference_x_01[6:14] = inference_x_01[4:12].clone()
+        inference_x_01[4:6] = generated_sample_01
+
 
 if __name__ == '__main__':
     exp3()

@@ -7,9 +7,9 @@ class Generator(nn.Module):
 
         self.fc = nn.Sequential(
             nn.Linear(noise_dim + continuous_code_dim + discrete_code_dim, 128),
-            nn.ReLU(0.1),
+            nn.LeakyReLU(0.1),
             nn.Linear(128, 128),
-            nn.ReLU(0.1),
+            nn.LeakyReLU(0.1),
             nn.Linear(128, out_dim)
         )
 
@@ -28,7 +28,7 @@ class Discriminator(nn.Module):
 
         self.discriminator = nn.Sequential(
             nn.Linear(data_dim, 128),
-            nn.ReLU(0.1),
+            nn.LeakyReLU(0.1),
             nn.Linear(128, 128)
         )
 
@@ -38,7 +38,7 @@ class Discriminator(nn.Module):
 
         self.infogan_q = nn.Sequential(
             nn.Linear(128, 128),
-            nn.ReLU(0.1),
+            nn.LeakyReLU(0.1),
             nn.Linear(128, discrete_code_dim + continuous_code_dim * 2)  # continuous code needs to have mu, sigma respectively
         )
 

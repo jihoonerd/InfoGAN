@@ -31,7 +31,7 @@ def exp3():
     input_vec_dim = 14  # [start x, start y, target x, target y, t_x, t_y, t-1_x, t-1_y...] 4 + 2*5
     discrete_code_dim = 2
     continuous_code_dim = 0
-    training_epochs = 5000
+    training_epochs = 15000
     gen_dim = 2
     disc_dim = 16
 

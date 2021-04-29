@@ -33,7 +33,7 @@ def exp4():
     input_vec_dim = 6
     discrete_code_dim = 2
     continuous_code_dim = 0
-    training_epochs = 18000
+    training_epochs = 20000
     gen_dim = 2
     disc_dim = 8
 
@@ -51,14 +51,13 @@ def exp4():
     data_y = torch.FloatTensor(np.concatenate(y, axis=0))
 
     dataset = TensorDataset(data_x, data_y)
-    loader = DataLoader(dataset, batch_size=512, shuffle=False)
+    loader = DataLoader(dataset, batch_size=512, shuffle=True)
 
     generator = Generator(noise_dim=input_vec_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=continuous_code_dim, out_dim=gen_dim)
     discriminator = Discriminator(data_dim=disc_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=continuous_code_dim)
     
     discriminator_loss = nn.BCELoss()
     generator_discrete_loss = nn.NLLLoss()
-    code_loss = nn.L1Loss(reduction='none')
     pdist = nn.PairwiseDistance(p=2)
 
     g_optimizer = optim.Adam(generator.parameters()) 
@@ -66,7 +65,7 @@ def exp4():
 
     
     for epoch in range(training_epochs):
-        cl_schedule = 0.005
+        cl_schedule = 0.003
         for x, y in loader:
 
             real_labels = torch.ones((x.shape[0]), requires_grad=False).unsqueeze(1)

@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.nn.modules import distance
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
 from infogan.data.generate_toy_example import generate_circle_toy_data_by_angle_random_path
-from infogan.data.utils import vectorize_path, append_infogan_code
+from infogan.data.utils import vectorize_path, append_infogan_code, compose_past_ctxt
 from infogan.model.network import Discriminator, Generator
 
 
@@ -20,47 +21,47 @@ def exp4():
     exp_path = 'exp_results/exp5/'
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
-    
 
     # set training settings
     input_vec_dim = 6
     discrete_code_dim = 2
     continuous_code_dim = 0
-    training_epochs = 18000
+    training_epochs = 20000
     gen_dim = 2
     disc_dim = 8
 
     x = []
     y = []
-    
-    cw_coord, ccw_coord = generate_circle_toy_data_by_angle_random_path()
-    cw_input, cw_gt = vectorize_path(cw_coord)
-    ccw_input, ccw_gt = vectorize_path(ccw_coord)
 
-    x.append(cw_input)
-    y.append(cw_gt)
-    x.append(ccw_input)
-    y.append(ccw_gt)
+    for _ in range(30):
+        cw_coord, ccw_coord = generate_circle_toy_data_by_angle_random_path()
+        cw_input, cw_gt = vectorize_path(cw_coord)
+        ccw_input, ccw_gt = vectorize_path(ccw_coord)
+
+        x.append(cw_input)
+        y.append(cw_gt)
+        x.append(ccw_input)
+        y.append(ccw_gt)
 
     data_x = torch.FloatTensor(np.concatenate(x, axis=0))
     data_y = torch.FloatTensor(np.concatenate(y, axis=0))
 
     dataset = TensorDataset(data_x, data_y)
-    loader = DataLoader(dataset, batch_size=512, shuffle=False)
+    loader = DataLoader(dataset, batch_size=1024, shuffle=True)
 
     generator = Generator(noise_dim=input_vec_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=continuous_code_dim, out_dim=gen_dim)
     discriminator = Discriminator(data_dim=disc_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=continuous_code_dim)
-    
+
     discriminator_loss = nn.BCELoss()
     generator_discrete_loss = nn.NLLLoss()
-    code_loss = nn.L1Loss()
+    pdist = nn.PairwiseDistance(p=2)
 
     g_optimizer = optim.Adam(generator.parameters()) 
     d_optimizer = optim.Adam(discriminator.parameters())
 
     
     for epoch in range(training_epochs):
-        cl_schedule = 0.1
+        cl_schedule = 0.0005
         for x, y in loader:
 
             real_labels = torch.ones((x.shape[0]), requires_grad=False).unsqueeze(1)
@@ -90,6 +91,8 @@ def exp4():
             discrete_code_loss = generator_discrete_loss(fake_q_discrete, fake_indices)
 
             # Code diff loss
+            distance_from_target = pdist(code_added[:, 4:6], code_added[:, 2:4])
+
             g_code_10 = code_added.clone()
             g_code_10[:, 6] = 1
             g_code_10[:, 7] = 0
@@ -102,11 +105,10 @@ def exp4():
             g_code_01_displacement = generator(g_code_01)
             g_code_01_out = x[:, 4:6] + g_code_01_displacement
 
-            cl = code_loss(g_code_10_out, g_code_01_out)
+            cl = torch.sum(pdist(g_code_10_out, g_code_01_out) * distance_from_target)
 
             total_gl = generator_loss + discrete_code_loss - cl * cl_schedule
-            cl_schedule *= 0.9
-            
+            # total_gl = generator_loss + discrete_code_loss 
             total_gl.backward()
             g_optimizer.step()
         
@@ -115,7 +117,7 @@ def exp4():
 
     inference_x_10 = data_x[0].clone().detach()
     inference_x_01 = data_x[0].clone().detach()
-    for i in range(int(data_x.shape[0]/2)):
+    for i in range(30):
 
         gen_path = os.path.join(exp_path, 'generated')
         p = pathlib.Path(gen_path)

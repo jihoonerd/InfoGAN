@@ -7,27 +7,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.nn.modules import distance
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from infogan.data.generate_toy_example import generate_circle_toy_data_by_angle
-from infogan.data.utils import vectorize_path, append_infogan_code, compose_past_ctxt
+from infogan.data.generate_toy_example import generate_circle_toy_data_by_angle_random_path
+from infogan.data.utils import vectorize_path, append_infogan_code
 from infogan.model.network import Discriminator, Generator
 
 
 def exp4():
 
-    exp_path = 'exp_results/exp4/'
+    exp_path = 'exp_results/exp5/'
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
-    cw_coord, ccw_coord = generate_circle_toy_data_by_angle()
-    plt.scatter(cw_coord[:, 0], cw_coord[:, 1], color='red', marker='o')
-    plt.scatter(ccw_coord[:, 0], ccw_coord[:, 1], color='green', marker='x')
-    plt.xlim([-5, 5])
-    plt.ylim([-5, 5])
-    plt.grid()
-    plt.savefig(os.path.join(exp_path, 'original.png'))
+    
 
     # set training settings
     input_vec_dim = 6
@@ -39,6 +32,8 @@ def exp4():
 
     x = []
     y = []
+    
+    cw_coord, ccw_coord = generate_circle_toy_data_by_angle_random_path()
     cw_input, cw_gt = vectorize_path(cw_coord)
     ccw_input, ccw_gt = vectorize_path(ccw_coord)
 
@@ -58,15 +53,14 @@ def exp4():
     
     discriminator_loss = nn.BCELoss()
     generator_discrete_loss = nn.NLLLoss()
-    code_loss = nn.L1Loss(reduction='none')
-    pdist = nn.PairwiseDistance(p=2)
+    code_loss = nn.L1Loss()
 
     g_optimizer = optim.Adam(generator.parameters()) 
     d_optimizer = optim.Adam(discriminator.parameters())
 
     
     for epoch in range(training_epochs):
-        cl_schedule = 0.005
+        cl_schedule = 0.1
         for x, y in loader:
 
             real_labels = torch.ones((x.shape[0]), requires_grad=False).unsqueeze(1)
@@ -96,8 +90,6 @@ def exp4():
             discrete_code_loss = generator_discrete_loss(fake_q_discrete, fake_indices)
 
             # Code diff loss
-            distance_from_target = pdist(code_added[:, 4:6], code_added[:, 2:4])
-
             g_code_10 = code_added.clone()
             g_code_10[:, 6] = 1
             g_code_10[:, 7] = 0
@@ -110,9 +102,10 @@ def exp4():
             g_code_01_displacement = generator(g_code_01)
             g_code_01_out = x[:, 4:6] + g_code_01_displacement
 
-            cl = torch.sum(pdist(g_code_10_out, g_code_01_out) * distance_from_target)
+            cl = code_loss(g_code_10_out, g_code_01_out)
 
             total_gl = generator_loss + discrete_code_loss - cl * cl_schedule
+            cl_schedule *= 0.9
             
             total_gl.backward()
             g_optimizer.step()

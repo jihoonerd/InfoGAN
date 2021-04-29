@@ -29,10 +29,10 @@ def exp4():
     plt.savefig(os.path.join(exp_path, 'original.png'))
 
     # set training settings
-    input_vec_dim = 6  # [start x, start y, target x, target y, t_x, t_y, t-1_x, t-1_y...] 4 + 2*5
+    input_vec_dim = 6
     discrete_code_dim = 2
     continuous_code_dim = 0
-    training_epochs = 15000
+    training_epochs = 18000
     gen_dim = 2
     disc_dim = 8
 
@@ -57,14 +57,14 @@ def exp4():
     
     discriminator_loss = nn.BCELoss()
     generator_discrete_loss = nn.NLLLoss()
-    code_loss = nn.MSELoss()
+    code_loss = nn.L1Loss()
 
     g_optimizer = optim.Adam(generator.parameters()) 
     d_optimizer = optim.Adam(discriminator.parameters())
 
-    cl_schedule = 0.3
+    
     for epoch in range(training_epochs):
-
+        cl_schedule = 0.1
         for x, y in loader:
 
             real_labels = torch.ones((x.shape[0]), requires_grad=False).unsqueeze(1)
@@ -94,23 +94,22 @@ def exp4():
             discrete_code_loss = generator_discrete_loss(fake_q_discrete, fake_indices)
 
             # Code diff loss
-            # README: USE ABOVE FAKE CASES. JUST make [1,0] and [0,1] Conditioned samples to be far
-            # g_code_10 = code_added.clone()
-            # g_code_10[:, 6] = 1
-            # g_code_10[:, 7] = 0
-            # g_code_10_displacement = generator(g_code_10.detach())
-            # g_code_10_out = x[:, 4:6] + g_code_10_displacement
+            g_code_10 = code_added.clone()
+            g_code_10[:, 6] = 1
+            g_code_10[:, 7] = 0
+            g_code_10_displacement = generator(g_code_10)
+            g_code_10_out = x[:, 4:6] + g_code_10_displacement
 
-            # g_code_01 = code_added.clone()
-            # g_code_01[:, 6] = 0
-            # g_code_01[:, 7] = 1
-            # g_code_01_displacement = generator(g_code_01.detach())
-            # g_code_01_out = x[:, 4:6] + g_code_01_displacement
+            g_code_01 = code_added.clone()
+            g_code_01[:, 6] = 0
+            g_code_01[:, 7] = 1
+            g_code_01_displacement = generator(g_code_01)
+            g_code_01_out = x[:, 4:6] + g_code_01_displacement
 
             cl = code_loss(g_code_10_out, g_code_01_out)
 
             total_gl = generator_loss + discrete_code_loss - cl * cl_schedule
-            cl_schedule *= 0.99
+            cl_schedule *= 0.9
             
             total_gl.backward()
             g_optimizer.step()

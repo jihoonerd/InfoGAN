@@ -21,11 +21,11 @@ def generate_circle_toy_data_by_angle():
     target_theta = 0
 
     if start_theta > target_theta:
-        cw_path = np.linspace(start_theta, target_theta, 60)
-        ccw_path = np.linspace(start_theta, target_theta + 360, 60)
+        cw_path = np.linspace(start_theta, target_theta, 30)
+        ccw_path = np.linspace(start_theta, target_theta + 360, 30)
     else:
-        cw_path = np.linspace(start_theta + 360, target_theta, 60)
-        ccw_path = np.linspace(start_theta, target_theta, 60)
+        cw_path = np.linspace(start_theta + 360, target_theta, 30)
+        ccw_path = np.linspace(start_theta, target_theta, 30)
     
     cw_x = np.array([np.cos(np.radians(degree % 360)) for degree in cw_path]).reshape(-1, 1)
     cw_y = np.array([np.sin(np.radians(degree % 360)) for degree in cw_path]).reshape(-1, 1)

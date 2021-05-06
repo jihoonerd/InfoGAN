@@ -18,8 +18,8 @@ from infogan.model.network import Discriminator, Generator
 
 def play():
 
-    exp_path = 'exp_results/play5/'
-    weigth_path = 'exp_results/exp5/weights/generator.pkl'
+    exp_path = 'exp_results/field_learning/'
+    weigth_path = 'exp_results/field_learning/generator_weight_w_noise'
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
 

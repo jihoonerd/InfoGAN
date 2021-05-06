@@ -19,7 +19,7 @@ from infogan.model.network import Discriminator, Generator
 def exp5():
 
     exp_path = 'exp_results/exp5/'
-    weight_name = 'generator_weight_wo_noise'
+    weight_name = 'generator_weight_w_noise'
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
 
@@ -74,13 +74,20 @@ def exp5():
             loss_d_real = discriminator_loss(real_gan_out, real_labels)
 
             code_added, fake_indices = append_infogan_code(x, discrete_code_dim, continuous_code_dim)
+
+            # Add noise to current position
+            noise = torch.normal(0, 0.1, size=code_added[:, 4:6].shape)
+            code_added[:, 4:6] += noise
             displacement = generator(code_added)
-            generated_samples = code_added[:, 4:6] + displacement
+            # Compensate added noise here
+
+            generated_samples = code_added[:, 4:6] + displacement - noise
             
             gen_with_context = torch.cat([x, generated_samples], dim=1)
 
             d_fake_gan_out, _, _, _ = discriminator(gen_with_context.detach())
             loss_d_fake = discriminator_loss(d_fake_gan_out, fake_labels)
+ 
             total_dl = loss_d_real + loss_d_fake
             total_dl.backward()
             d_optimizer.step()

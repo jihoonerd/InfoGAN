@@ -18,8 +18,8 @@ from infogan.model.network import Discriminator, Generator
 
 def play():
 
-    exp_path = 'exp_results/field_learning/'
-    weigth_path = 'exp_results/field_learning/generator_weight_w_noise'
+    exp_path = 'exp_results/exp5/'
+    weigth_path = 'exp_results/exp5/generator_weight_wo_noise'
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
 
@@ -52,7 +52,7 @@ def play():
 
     inference_x_10 = data_x[0].clone().detach()
     inference_x_01 = data_x[0].clone().detach()
-    for i in range(30):
+    for i in range(40):
 
         gen_path = os.path.join(exp_path, 'generated')
         p = pathlib.Path(gen_path)

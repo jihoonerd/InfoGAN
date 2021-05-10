@@ -27,7 +27,7 @@ def exp5():
     input_vec_dim = 6
     discrete_code_dim = 2
     continuous_code_dim = 0
-    training_epochs = 20000
+    training_epochs = 5000
     gen_dim = 2
     disc_dim = 8
 
@@ -115,50 +115,6 @@ def exp5():
         print(f"EPOCH [{epoch}]: Generator Loss: {generator_loss} / Discriminator Loss: {total_dl}")    
 
     torch.save(generator.state_dict(), weight_name)
-
-    inference_x_10 = data_x[0].clone().detach()
-    inference_x_01 = data_x[0].clone().detach()
-    for i in range(30):
-
-        gen_path = os.path.join(exp_path, 'generated')
-        p = pathlib.Path(gen_path)
-        p.mkdir(parents=True, exist_ok=True)
-        plt.figure()
-        circle = plt.Circle((0, 0), 1, color='grey', fill=False)
-        plt.gca().add_patch(circle)
-
-        code_10 = torch.Tensor([1, 0])
-        coded_10 = torch.cat([inference_x_10.reshape(1, -1), code_10.reshape(1, -1)], dim=1)
-        displacement_10 = generator(coded_10)
-        generated_sample_10 = (inference_x_10[4:6] + displacement_10).detach().squeeze()
-
-        code_01 = torch.Tensor([0, 1])
-        coded_01 = torch.cat([inference_x_01.reshape(1, -1), code_01.reshape(1, -1)], dim=1)
-        displacement_01 = generator(coded_01)
-        generated_sample_01 = (inference_x_01[4:6] + displacement_01).detach().squeeze()
-
-        plt.scatter(inference_x_10[0], inference_x_10[1], color='red')
-        plt.scatter(inference_x_10[2], inference_x_10[3], color='blue')
-        plt.scatter(inference_x_10[4], inference_x_10[5], color='black')  # plot current pos
-        plt.scatter(generated_sample_10[0], generated_sample_10[1], color='purple')  # prediction
-
-
-        plt.scatter(inference_x_01[0], inference_x_01[1], color='red')
-        plt.scatter(inference_x_01[2], inference_x_01[3], color='blue')
-        plt.scatter(inference_x_01[4], inference_x_01[5], color='brown')  # plot current pos
-        plt.scatter(generated_sample_01[0], generated_sample_01[1], color='cyan')  # prediction
-
-        plt.xlim([-1.5, 1.5])
-        plt.ylim([-1.5, 1.5])
-        plt.grid()
-        plt.savefig(os.path.join(gen_path, "generated_{0:05d}.png".format(i)))
-
-        inference_x_10 = inference_x_10.clone()
-        inference_x_10[4:6] = generated_sample_10
-
-        inference_x_01 = inference_x_01.clone()
-        inference_x_01[4:6] = generated_sample_01
-
 
 if __name__ == '__main__':
     exp5()

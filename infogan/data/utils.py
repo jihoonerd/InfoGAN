@@ -32,7 +32,7 @@ def append_infogan_code(input_data, discrete_code_dim, continuous_code_dim):
         label_idx = torch.randint(
             low=0, high=discrete_code_dim, size=(num_samples,))
         discrete_code = torch.nn.functional.one_hot(label_idx)
-    return_vec = torch.cat([input_data, discrete_code], dim=1)
+        return_vec = torch.cat([input_data, discrete_code], dim=1)
 
     # This condition handles continuous latent codes
     if continuous_code_dim != 0:
@@ -40,7 +40,10 @@ def append_infogan_code(input_data, discrete_code_dim, continuous_code_dim):
             continuous_code = torch.FloatTensor(num_samples, 1).uniform_(-1, 1)
             # concat generated codes
             return_vec = torch.cat([return_vec, continuous_code], dim=1)
-
+    
+    if (discrete_code_dim == 0) and (continuous_code_dim == 0):
+        return_vec = input_data
+        label_idx = None
     return return_vec, label_idx
 
 

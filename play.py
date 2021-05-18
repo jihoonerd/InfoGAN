@@ -59,7 +59,7 @@ def play():
     past_01_x = []
     past_01_y = []
 
-    for i in range(40):
+    for i in range(30):
 
         gen_path = os.path.join(exp_path, 'generated')
         p = pathlib.Path(gen_path)
@@ -78,18 +78,18 @@ def play():
         displacement_01 = generator(coded_01)
         generated_sample_01 = (inference_x_01[4:6] + displacement_01).detach().squeeze()
 
-        start = plt.scatter(inference_x_10[0], inference_x_10[1], color='red', s=70, label='start')
-        goal = plt.scatter(inference_x_10[2], inference_x_10[3], color='blue', s=70, label='goal')
+        start = plt.scatter(inference_x_10[0], inference_x_10[1], color='red', s=70, label='Start')
+        goal = plt.scatter(inference_x_10[2], inference_x_10[3], color='blue', s=70, label='Goal')
 
         plt.scatter(past_10_x, past_10_y, color='lightgrey', s=70, alpha=0.97)
-        cur10 = plt.scatter(inference_x_10[4], inference_x_10[5], color='forestgreen', s=70, label='current pos $[1,0]$')  # plot current pos
-        pred10 = plt.scatter(generated_sample_10[0], generated_sample_10[1], color='palegreen', s=70, label='pred pos $[1,0]$')  # prediction
+        cur10 = plt.scatter(inference_x_10[4], inference_x_10[5], color='forestgreen', s=70, label='Current pos $[1,0]$')  # plot current pos
+        pred10 = plt.scatter(generated_sample_10[0], generated_sample_10[1], color='palegreen', s=70, label='Pred pos $[1,0]$')  # prediction
         past_10_x.append(generated_sample_10[0])
         past_10_y.append(generated_sample_10[1])
         
         plt.scatter(past_01_x, past_01_y, color='lightgrey', s=70, alpha=0.97)
-        cur01 = plt.scatter(inference_x_01[4], inference_x_01[5], color='darkgoldenrod', s=70, label='current pos $[0,1]$')  # plot current pos
-        pred01= plt.scatter(generated_sample_01[0], generated_sample_01[1], color='tan', s=70, label='pred pos $[0,1]$')  # prediction
+        cur01 = plt.scatter(inference_x_01[4], inference_x_01[5], color='darkgoldenrod', s=70, label='Current pos $[0,1]$')  # plot current pos
+        pred01= plt.scatter(generated_sample_01[0], generated_sample_01[1], color='tan', s=70, label='Pred pos $[0,1]$')  # prediction
         past_01_x.append(generated_sample_01[0])
         past_01_y.append(generated_sample_01[1])
 

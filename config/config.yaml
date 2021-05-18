@@ -1,0 +1,7 @@
+model:
+  infogan: false
+  noise: false
+  code_dist_loss: false
+  num_circle_samples: 64
+  epochs: 3000
+  noise_weight: 0.001

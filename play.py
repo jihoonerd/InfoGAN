@@ -16,8 +16,8 @@ from infogan.model.network import Generator
 
 def play():
     config = yaml.safe_load(open('./config/config.yaml', 'r').read())
-    exp_path = '/home/jihoon/Repositories/InfoGAN/results/infogan_True_noise_False'
-    weigth_path = os.path.join(exp_path, 'infogan_True_noise_False_training_epochs')
+    exp_path = '/home/jihoon/Repositories/InfoGAN/results/infogan_True_noise_False_code_dl_False'
+    weigth_path = os.path.join(exp_path, 'weights')
     use_infogan = config['model']['infogan']
     use_noise = config['model']['noise']
     training_epochs = config['model']['epochs']
@@ -29,16 +29,11 @@ def play():
 
     # set training settings
     input_vec_dim = 6
-    discrete_code_dim = 2
-    continuous_code_dim = 0
-    gen_dim = 2
-
-    # set training settings
-    input_vec_dim = 6
     if use_infogan:
         discrete_code_dim = 2
     else:
         discrete_code_dim = 0
+    continuous_code_dim = 0
     gen_dim = 2
 
     x = []

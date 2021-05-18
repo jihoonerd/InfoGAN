@@ -26,7 +26,7 @@ def exp():
     noise_weight = config['model']['noise_weight']
     use_code_dist_loss = config['model']['code_dist_loss']
     
-    export_path = f'results/infogan_{use_infogan}_noise_{use_noise}/'
+    export_path = f'results/infogan_{use_infogan}_noise_{use_noise}_code_dl_{use_code_dist_loss}/'
     weight_name = os.path.join(export_path, 'weights')
     p = pathlib.Path(export_path)
     p.mkdir(parents=True, exist_ok=True)
@@ -128,7 +128,7 @@ def exp():
                 discrete_code_loss = generator_discrete_loss(fake_q_discrete, fake_indices)
 
             if use_code_dist_loss:
-                # distance_from_target = pdist(code_added[:, 4:6], code_added[:, 2:4])
+                distance_from_target = pdist(code_added[:, 4:6], code_added[:, 2:4])
 
                 g_code_10 = code_added.clone()
                 g_code_10[:, 6] = 1
@@ -148,7 +148,7 @@ def exp():
                 else:
                     g_code_01_out = x[:, 4:6] + g_code_01_displacement
 
-                cdl = torch.sum(pdist(g_code_10_out, g_code_01_out))
+                cdl = torch.sum(pdist(g_code_10_out, g_code_01_out) * distance_from_target)
 
             if use_infogan and use_code_dist_loss:
                 total_gl = generator_loss + discrete_code_loss - cdl * noise_weight
@@ -160,7 +160,10 @@ def exp():
             total_gl.backward()
             g_optimizer.step()
         
-        print(f"EPOCH [{epoch}]: Generator Loss: {generator_loss} / Discriminator Loss: {total_dl}")    
+        if use_code_dist_loss:
+            print(f"EPOCH [{epoch}]: Generator Loss: {generator_loss} / Discriminator Loss: {total_dl} / Code Dist Loss: {-cdl * noise_weight}")
+        else:
+            print(f"EPOCH [{epoch}]: Generator Loss: {generator_loss} / Discriminator Loss: {total_dl}")
 
     torch.save(generator.state_dict(), weight_name)
 

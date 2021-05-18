@@ -4,6 +4,7 @@ import os
 import pathlib
 
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 import numpy as np
 import torch
 import torch.nn as nn
@@ -19,7 +20,7 @@ from infogan.model.network import Discriminator, Generator
 def play():
 
     exp_path = 'exp_results/exp5/'
-    weigth_path = 'exp_results/exp5/generator_weight_wo_noise'
+    weigth_path = 'exp_results/exp5/generator_weight_w_noise'
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
 
@@ -52,6 +53,12 @@ def play():
 
     inference_x_10 = data_x[0].clone().detach()
     inference_x_01 = data_x[0].clone().detach()
+    past_10_x = []
+    past_10_y = []
+
+    past_01_x = []
+    past_01_y = []
+
     for i in range(40):
 
         gen_path = os.path.join(exp_path, 'generated')
@@ -71,21 +78,34 @@ def play():
         displacement_01 = generator(coded_01)
         generated_sample_01 = (inference_x_01[4:6] + displacement_01).detach().squeeze()
 
-        plt.scatter(inference_x_10[0], inference_x_10[1], color='red')
-        plt.scatter(inference_x_10[2], inference_x_10[3], color='blue')
-        plt.scatter(inference_x_10[4], inference_x_10[5], color='black')  # plot current pos
-        plt.scatter(generated_sample_10[0], generated_sample_10[1], color='purple')  # prediction
+        start = plt.scatter(inference_x_10[0], inference_x_10[1], color='red', s=70, label='start')
+        goal = plt.scatter(inference_x_10[2], inference_x_10[3], color='blue', s=70, label='goal')
 
-
-        plt.scatter(inference_x_01[0], inference_x_01[1], color='red')
-        plt.scatter(inference_x_01[2], inference_x_01[3], color='blue')
-        plt.scatter(inference_x_01[4], inference_x_01[5], color='brown')  # plot current pos
-        plt.scatter(generated_sample_01[0], generated_sample_01[1], color='cyan')  # prediction
+        plt.scatter(past_10_x, past_10_y, color='lightgrey', s=70, alpha=0.97)
+        cur10 = plt.scatter(inference_x_10[4], inference_x_10[5], color='forestgreen', s=70, label='current pos $[1,0]$')  # plot current pos
+        pred10 = plt.scatter(generated_sample_10[0], generated_sample_10[1], color='palegreen', s=70, label='pred pos $[1,0]$')  # prediction
+        past_10_x.append(generated_sample_10[0])
+        past_10_y.append(generated_sample_10[1])
+        
+        plt.scatter(past_01_x, past_01_y, color='lightgrey', s=70, alpha=0.97)
+        cur01 = plt.scatter(inference_x_01[4], inference_x_01[5], color='darkgoldenrod', s=70, label='current pos $[0,1]$')  # plot current pos
+        pred01= plt.scatter(generated_sample_01[0], generated_sample_01[1], color='tan', s=70, label='pred pos $[0,1]$')  # prediction
+        past_01_x.append(generated_sample_01[0])
+        past_01_y.append(generated_sample_01[1])
 
         plt.xlim([-1.5, 1.5])
         plt.ylim([-1.5, 1.5])
         plt.grid()
-        plt.savefig(os.path.join(gen_path, "generated_{0:05d}.png".format(i)))
+        plt.gca().set_aspect("equal")
+
+        fontP = FontProperties()
+        fontP.set_size('x-small')
+
+        plt.legend(handles=[start, goal, cur10, pred10, cur01, pred01], bbox_to_anchor=(1, 1), loc='upper left', prop=fontP)
+        plt.xlabel('$X$')
+        plt.ylabel('$Y$')
+        plt.title('InfoGAN Path Example')
+        plt.savefig(os.path.join(gen_path, "generated_{0:05d}.png".format(i)), dpi=300)
 
         inference_x_10 = inference_x_10.clone()
         inference_x_10[4:6] = generated_sample_10

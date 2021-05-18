@@ -23,7 +23,7 @@ def exp():
     use_code_dist_loss = config['model']['code_dist_loss']
     
     export_path = f'results/infogan_{use_infogan}_noise_{use_noise}/'
-    weight_name = f'infogan_{use_infogan}_noise_{use_noise}_training_epochs'
+    weight_name = f'{export_path}/infogan_{use_infogan}_noise_{use_noise}_training_epochs'
     p = pathlib.Path(export_path)
     p.mkdir(parents=True, exist_ok=True)
 
@@ -53,7 +53,7 @@ def exp():
     data_y = torch.FloatTensor(np.concatenate(y, axis=0))
 
     dataset = TensorDataset(data_x, data_y)
-    loader = DataLoader(dataset, batch_size=32, shuffle=True)
+    loader = DataLoader(dataset, batch_size=128, shuffle=True)
 
     generator = Generator(noise_dim=input_vec_dim, discrete_code_dim=discrete_code_dim, continuous_code_dim=0, out_dim=gen_dim)
     if use_infogan:
@@ -77,7 +77,10 @@ def exp():
 
             d_optimizer.zero_grad()
             y_with_context = torch.cat([x, y], dim=1)
-            real_gan_out, real_q_discrete, real_q_mu, real_q_var = discriminator(y_with_context)
+            if not use_infogan:
+                real_gan_out = discriminator(y_with_context)
+            else:
+                real_gan_out, real_q_discrete, real_q_mu, real_q_var = discriminator(y_with_context)
             loss_d_real = discriminator_loss(real_gan_out, real_labels)
 
             code_added, fake_indices = append_infogan_code(x, discrete_code_dim, 0)
@@ -96,7 +99,10 @@ def exp():
             
             gen_with_context = torch.cat([x, generated_samples], dim=1)
 
-            d_fake_gan_out, _, _, _ = discriminator(gen_with_context.detach())
+            if not use_infogan:
+                d_fake_gan_out = discriminator(gen_with_context.detach())
+            else:
+                d_fake_gan_out, _, _, _ = discriminator(gen_with_context.detach())
             loss_d_fake = discriminator_loss(d_fake_gan_out, fake_labels)
  
             total_dl = loss_d_real + loss_d_fake
@@ -104,7 +110,10 @@ def exp():
             d_optimizer.step()
 
             g_optimizer.zero_grad()
-            g_fake_gan_out, fake_q_discrete, fake_q_mu, fake_q_var = discriminator(gen_with_context)
+            if not use_infogan:
+                g_fake_gan_out = discriminator(gen_with_context)
+            else:
+                g_fake_gan_out, fake_q_discrete, fake_q_mu, fake_q_var = discriminator(gen_with_context)
             generator_loss = discriminator_loss(g_fake_gan_out, real_labels)
 
             if use_infogan:
@@ -118,7 +127,10 @@ def exp():
                 g_code_10[:, 6] = 1
                 g_code_10[:, 7] = 0
                 g_code_10_displacement = generator(g_code_10)
-                g_code_10_out = x[:, 4:6] + g_code_10_displacement - noise
+                if use_noise:
+                    g_code_10_out = x[:, 4:6] + g_code_10_displacement - noise
+                else:
+                    g_code_10_out = x[:, 4:6] + g_code_10_displacement
 
                 g_code_01 = code_added.clone()
                 g_code_01[:, 6] = 0

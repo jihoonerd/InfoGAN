@@ -1,7 +1,7 @@
 import os
 import imageio
 
-png_dir = 'exp_results/exp5/generated'
+png_dir = '/home/jihoon/Repositories/InfoGAN/results/infogan_False_noise_False/generated'
 images = []
 for file_name in sorted(os.listdir(png_dir)):
     if file_name.endswith('.png'):

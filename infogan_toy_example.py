@@ -1,15 +1,19 @@
 
+import os
 import pathlib
-import yaml
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import yaml
 from torch.utils.data import DataLoader, TensorDataset
 
-from infogan.data.generate_toy_example import generate_circle_toy_data_by_angle_random_path
-from infogan.data.utils import vectorize_path, append_infogan_code
-from infogan.model.network import Discriminator, Generator, InfoGANDiscriminator
+from infogan.data.generate_toy_example import \
+    generate_circle_toy_data_by_angle_random_path
+from infogan.data.utils import append_infogan_code, vectorize_path
+from infogan.model.network import (Discriminator, Generator,
+                                   InfoGANDiscriminator)
 
 
 def exp():
@@ -23,7 +27,7 @@ def exp():
     use_code_dist_loss = config['model']['code_dist_loss']
     
     export_path = f'results/infogan_{use_infogan}_noise_{use_noise}/'
-    weight_name = f'{export_path}/infogan_{use_infogan}_noise_{use_noise}_training_epochs'
+    weight_name = os.path.join(export_path, 'weights')
     p = pathlib.Path(export_path)
     p.mkdir(parents=True, exist_ok=True)
 
@@ -62,7 +66,7 @@ def exp():
         discriminator = Discriminator(data_dim=disc_dim)
 
     discriminator_loss = nn.BCELoss()
-    generator_discrete_loss = nn.NLLLoss()
+    generator_discrete_loss = nn.CrossEntropyLoss()
     pdist = nn.PairwiseDistance(p=2)
 
     g_optimizer = optim.Adam(generator.parameters(), amsgrad=True) 
@@ -77,17 +81,18 @@ def exp():
 
             d_optimizer.zero_grad()
             y_with_context = torch.cat([x, y], dim=1)
-            if not use_infogan:
-                real_gan_out = discriminator(y_with_context)
+            if use_infogan:
+                real_gan_out, _ = discriminator(y_with_context)
             else:
-                real_gan_out, real_q_discrete, real_q_mu, real_q_var = discriminator(y_with_context)
+                real_gan_out = discriminator(y_with_context)
+
             loss_d_real = discriminator_loss(real_gan_out, real_labels)
 
             code_added, fake_indices = append_infogan_code(x, discrete_code_dim, 0)
 
             # Add noise to current position
             if use_noise:
-                noise = torch.normal(0, 0.1, size=code_added[:, 4:6].shape)
+                noise = torch.normal(0, 0.05, size=code_added[:, 4:6].shape)
                 code_added[:, 4:6] += noise
             displacement = generator(code_added)
             
@@ -99,10 +104,11 @@ def exp():
             
             gen_with_context = torch.cat([x, generated_samples], dim=1)
 
-            if not use_infogan:
-                d_fake_gan_out = discriminator(gen_with_context.detach())
+            if use_infogan:
+                d_fake_gan_out, _ = discriminator(gen_with_context.detach())
             else:
-                d_fake_gan_out, _, _, _ = discriminator(gen_with_context.detach())
+                d_fake_gan_out = discriminator(gen_with_context.detach())
+
             loss_d_fake = discriminator_loss(d_fake_gan_out, fake_labels)
  
             total_dl = loss_d_real + loss_d_fake
@@ -110,18 +116,19 @@ def exp():
             d_optimizer.step()
 
             g_optimizer.zero_grad()
-            if not use_infogan:
-                g_fake_gan_out = discriminator(gen_with_context)
+
+            if use_infogan:
+                g_fake_gan_out, fake_q_discrete = discriminator(gen_with_context)
             else:
-                g_fake_gan_out, fake_q_discrete, fake_q_mu, fake_q_var = discriminator(gen_with_context)
+                g_fake_gan_out = discriminator(gen_with_context)
+
             generator_loss = discriminator_loss(g_fake_gan_out, real_labels)
 
             if use_infogan:
                 discrete_code_loss = generator_discrete_loss(fake_q_discrete, fake_indices)
 
             if use_code_dist_loss:
-                # Code diff loss
-                distance_from_target = pdist(code_added[:, 4:6], code_added[:, 2:4])
+                # distance_from_target = pdist(code_added[:, 4:6], code_added[:, 2:4])
 
                 g_code_10 = code_added.clone()
                 g_code_10[:, 6] = 1
@@ -141,7 +148,7 @@ def exp():
                 else:
                     g_code_01_out = x[:, 4:6] + g_code_01_displacement
 
-                cdl = torch.sum(pdist(g_code_10_out, g_code_01_out) * distance_from_target)
+                cdl = torch.sum(pdist(g_code_10_out, g_code_01_out))
 
             if use_infogan and use_code_dist_loss:
                 total_gl = generator_loss + discrete_code_loss - cdl * noise_weight

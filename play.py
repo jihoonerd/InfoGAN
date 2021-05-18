@@ -16,14 +16,9 @@ from infogan.model.network import Generator
 
 def play():
     config = yaml.safe_load(open('./config/config.yaml', 'r').read())
-    exp_path = '/home/jihoon/Repositories/InfoGAN/results/infogan_True_noise_True_code_dl_True'
+    exp_path = '/home/jihoon/Repositories/InfoGAN/results/infogan_True_noise_True_code_dl_False'
     weigth_path = os.path.join(exp_path, 'weights')
     use_infogan = config['model']['infogan']
-    use_noise = config['model']['noise']
-    training_epochs = config['model']['epochs']
-    num_circle_samples = config['model']['num_circle_samples']
-    noise_weight = config['model']['noise_weight']
-    use_code_dist_loss = config['model']['code_dist_loss']
     p = pathlib.Path(exp_path)
     p.mkdir(parents=True, exist_ok=True)
 
@@ -140,7 +135,7 @@ def play():
         plt.ylabel('$Y$')
 
         if use_infogan:
-            plt.title('InfoGAN Path Example')
+            plt.title('InfoGAN Path')
         else:
             plt.title('Vanilla GAN')
         plt.savefig(os.path.join(gen_path, "generated_{0:05d}.png".format(i)), dpi=300)

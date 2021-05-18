@@ -16,7 +16,7 @@ from infogan.model.network import Generator
 
 def play():
     config = yaml.safe_load(open('./config/config.yaml', 'r').read())
-    exp_path = '/home/jihoon/Repositories/InfoGAN/results/infogan_True_noise_False_code_dl_False'
+    exp_path = '/home/jihoon/Repositories/InfoGAN/results/infogan_True_noise_True_code_dl_True'
     weigth_path = os.path.join(exp_path, 'weights')
     use_infogan = config['model']['infogan']
     use_noise = config['model']['noise']
@@ -86,7 +86,7 @@ def play():
             code_01 = torch.Tensor([0, 1])
             coded_01 = torch.cat([inference_x_01.reshape(1, -1), code_01.reshape(1, -1)], dim=1)
             displacement_01 = generator(coded_01)
-            generated_sample_01 = (inference_x_01[4:6] + displacement_01).detach().squeeze()        
+            generated_sample_01 = (inference_x_01[4:6] + displacement_01).detach().squeeze()
         
             start = plt.scatter(inference_x_10[0], inference_x_10[1], color='red', s=70, label='Start')
             goal = plt.scatter(inference_x_10[2], inference_x_10[3], color='blue', s=70, label='Goal')

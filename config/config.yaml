@@ -1,7 +1,7 @@
 model:
   infogan: true
-  noise: false
+  noise: true
   code_dist_loss: true
   num_circle_samples: 128
-  epochs: 3000
+  epochs: 2000
   noise_weight: 0.001

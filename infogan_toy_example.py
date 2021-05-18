@@ -92,7 +92,9 @@ def exp():
 
             # Add noise to current position
             if use_noise:
-                noise = torch.normal(0, 0.05, size=code_added[:, 4:6].shape)
+                from_target_dist = pdist(code_added[:, 4:6], code_added[:, 2:4])
+                smoothed_weight = -torch.abs(from_target_dist - 1) + 1 # y = -|x-1| + 1 to give small noise at the both end
+                noise = torch.normal(0, 0.1, size=code_added[:, 4:6].shape) * smoothed_weight.unsqueeze(1)
                 code_added[:, 4:6] += noise
             displacement = generator(code_added)
             

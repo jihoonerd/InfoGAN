@@ -16,7 +16,7 @@ from infogan.model.network import Generator
 
 def play():
     config = yaml.safe_load(open('./config/config.yaml', 'r').read())
-    exp_path = '/home/jihoon/Repositories/InfoGAN/results/infogan_True_noise_True_code_dl_False'
+    exp_path = '/home/jihoon/Repositories/InfoGAN/results/infogan_True_noise_True_code_dl_True'
     weigth_path = os.path.join(exp_path, 'weights')
     use_infogan = config['model']['infogan']
     p = pathlib.Path(exp_path)

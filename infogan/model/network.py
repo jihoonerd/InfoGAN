@@ -67,7 +67,6 @@ class InfoGANDiscriminator(nn.Module):
         )
 
         self.sigmoid = nn.Sigmoid()
-        self.softplus = nn.Softplus()
 
     def forward(self, x):
         discriminator_out = self.discriminator(x)

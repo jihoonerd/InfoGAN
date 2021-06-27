@@ -82,8 +82,11 @@ def exp():
             d_optimizer.zero_grad()
             from_target_dist = pdist(x[:, 4:6], x[:, 2:4])
             smoothed_weight = -torch.abs(from_target_dist - 1) + 1 # y = -|x-1| + 1 to give small noise at the both end
-            noise = torch.normal(0, 0.1, size=x[:, 4:6].shape) * smoothed_weight.unsqueeze(1)
-            x[:,4:6] += noise
+            
+            if use_noise:
+                noise = torch.normal(0, 0.1, size=x[:, 4:6].shape) * smoothed_weight.unsqueeze(1)
+                x[:,4:6] += noise
+
             y_with_context = torch.cat([x, y], dim=1)
             if use_infogan:
                 real_gan_out, _ = discriminator(y_with_context)
@@ -96,10 +99,7 @@ def exp():
 
             displacement = generator(code_added)
             
-            if use_noise:
-                generated_samples = code_added[:, 4:6] + displacement
-            else:
-                generated_samples = code_added[:, 4:6] + displacement
+            generated_samples = code_added[:, 4:6] + displacement
             
             gen_with_context = torch.cat([x, generated_samples], dim=1)
 
@@ -133,19 +133,13 @@ def exp():
                 g_code_10[:, 6] = 1
                 g_code_10[:, 7] = 0
                 g_code_10_displacement = generator(g_code_10)
-                if use_noise:
-                    g_code_10_out = x[:, 4:6] + g_code_10_displacement
-                else:
-                    g_code_10_out = x[:, 4:6] + g_code_10_displacement
+                g_code_10_out = x[:, 4:6] + g_code_10_displacement
 
                 g_code_01 = code_added.clone()
                 g_code_01[:, 6] = 0
                 g_code_01[:, 7] = 1
                 g_code_01_displacement = generator(g_code_01)
-                if use_noise:
-                    g_code_01_out = x[:, 4:6] + g_code_01_displacement
-                else:
-                    g_code_01_out = x[:, 4:6] + g_code_01_displacement
+                g_code_01_out = x[:, 4:6] + g_code_01_displacement
 
                 cdl = torch.sum(pdist(g_code_10_out, g_code_01_out) * distance_from_target)
 

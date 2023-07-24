@@ -16,7 +16,7 @@ pytest==6.2.3
 python-dateutil==2.8.1
 six==1.15.0
 toml==0.10.2
-torch==1.8.1+cu111
+torch==1.13.1
 torchaudio==0.8.1
 torchvision==0.9.1+cu111
 typing-extensions==3.7.4.3
